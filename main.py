@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.express as px
-import backend
+from backend import get_data, get_location
 
 data = []
 
@@ -18,18 +18,31 @@ option = st.selectbox('Select the data to view', options=('Temperature', 'Sky'))
 st.subheader(f'{option} forecast for the next {days} day{suffix} in {location.capitalize()}')
 
 if location:
-    lat, lon = backend.get_location(location)
-    data = backend.get_data(lat, lon, days)
+    try:
+        lat, lon = get_location(location)
+        data = get_data(lat, lon, days)
 
-    dates = []
-    temperatures = []
-    for item in data['list']:
-        dates.append(item['dt_txt'])
-        temperatures.append(f'{item['main']['temp']}')
+        if option == 'Temperature':
+            dates = []
+            temperatures = []
+            for item in data['list']:
+                dates.append(item['dt_txt'])
+                temperatures.append(f'{item['main']['temp']}')
 
-    if option == 'Temperature':
-        figure = px.line(x=dates, y=temperatures, labels={'x': 'Date', 'y': 'Temperature (C)'})
-        st.plotly_chart(figure)
-    if option == 'Sky':
-        pass
+            figure = px.line(x=dates, y=temperatures, labels={'x': 'Date', 'y': 'Temperature (C)'})
+            st.plotly_chart(figure)
 
+        if option == 'Sky':
+            dates = []
+            conds = []
+            img_paths_list = []
+
+            for item in data['list']:
+                dates.append(item['dt_txt'])
+                conds.append(f'{item['weather'][0]['main']}')
+
+                img_paths_list = [f'images\\{cond.lower()}.png' for cond in conds]
+            st.image(img_paths_list, width=115, caption=dates)
+
+    except IndexError:
+        st.warning('The selected location is not found')

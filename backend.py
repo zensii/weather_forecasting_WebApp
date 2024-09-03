@@ -22,15 +22,6 @@ def get_data(lat, lon, days):
     return data
 
 
-def get_current(location):
-     query = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric'
-     response = requests.get(query)
-     current = response.json()
-
-     return current
-
-
 if __name__ == '__main__':
     lat, lon = get_location('Anchorage')
     data = get_data(lat, lon, days=3)
-    current = get_current('Anchorage')
